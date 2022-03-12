@@ -11,15 +11,15 @@ const webhookClient = new WebhookClient(
     token: process.env.WEBHOOK_TOKEN,
   },
   {
-    ws: 'ws://tau-usenameaodhan.up.railway.app/ws/twitch-events/',
+    ws: 'wss://tau-usenameaodhan.up.railway.app:443/ws/twitch-events/',
   }
 );
 
-client.on('ready', () => {
-  console.log('Ready!');
+client.on('ready', (c) => {
+  console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
-webhookClient.send('hello from the webhook');
+webhookClient.send('Webhook withou client');
 
 client.on('messageCreate', (message) => {
   if (message.content === 'ping') {
@@ -27,6 +27,10 @@ client.on('messageCreate', (message) => {
       content: 'pong',
     });
   }
+});
+
+client.on('webhookUpdate', (webhook) => {
+  console.log(webhook);
 });
 
 client.login(process.env.BOT_TOKEN);
