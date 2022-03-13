@@ -1,25 +1,33 @@
 const { Client, Intents, WebhookClient } = require('discord.js');
 require('dotenv').config();
 
+const WebSocket = require('ws');
+
+const ws = new WebSocket(
+  'wss://tau-usenameaodhan.up.railway.app:443/ws/twitch-events/',
+  {
+    perMessageDeflate: false,
+  }
+);
+
+ws.on('open', () => {
+  console.log('Connected to websocket');
+  ws.send(JSON.stringify({ token: process.env.TAU_TOKEN }));
+});
+
+ws.on('message', function message(data) {
+  console.log('received: %s', data);
+});
+
 const client = new Client({
   intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
 });
-
-const webhookClient = new WebhookClient(
-  {
-    id: process.env.WEBHOOK_ID,
-    token: process.env.WEBHOOK_TOKEN,
-  },
-  {
-    ws: 'wss://tau-usenameaodhan.up.railway.app:443/ws/twitch-events/',
-  }
-);
 
 client.on('ready', (c) => {
   console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
-webhookClient.send('Webhook withou client');
+// webhookClient.send('Webhook without client');
 
 client.on('messageCreate', (message) => {
   if (message.content === 'ping') {
@@ -27,10 +35,6 @@ client.on('messageCreate', (message) => {
       content: 'pong',
     });
   }
-});
-
-client.on('webhookUpdate', (webhook) => {
-  console.log(webhook);
 });
 
 client.login(process.env.BOT_TOKEN);
