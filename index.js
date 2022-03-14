@@ -5,6 +5,10 @@ const axios = require('axios').default;
 
 const WebSocket = require('ws');
 
+const webhookClient = new WebhookClient({
+  url: process.env.WEBHOOK_URL,
+});
+
 const ws = new WebSocket(
   'wss://tau-usenameaodhan.up.railway.app:443/ws/twitch-events/',
   {
@@ -26,26 +30,29 @@ client.on('ready', (c) => {
 });
 
 ws.on('message', async (data) => {
-  const parsed = JSON.parse(data);
-  console.log(parsed.event_data.broadcaster_user_login);
+  const parsedData = JSON.parse(data);
 
-  const res = await axios({
+  if (parsedData.event_type === 'stream-offline') return;
+
+  const stream = await axios({
     method: 'get',
-    url: `https://tau-usenameaodhan.up.railway.app/api/twitch/helix/users?login=${parsed.event_data.broadcaster_user_login}`,
+    url: `https://tau-usenameaodhan.up.railway.app/api/twitch/helix/streams?user_login=${parsedData.event_data.broadcaster_user_login}`,
     headers: { Authorization: `Token ${process.env.TAU_TOKEN}` },
+  }).then((res) => {
+    return res.data.data;
   });
-
-  const event = res.data;
-  console.log(event);
-});
-// webhookClient.send('Webhook without client');
-
-client.on('messageCreate', (message) => {
-  if (message.content === 'ping') {
-    message.reply({
-      content: 'pong',
-    });
-  }
+  console.log(stream[0].user_name);
+  webhookClient.send({
+    content: `${stream[0].user_name} is now streaming!`,
+    embeds: [
+      {
+        title: `${stream[0].title}`,
+        thumbnail: {
+          url: 'https://images.unsplash.com/photo-1647164925200-54d1939ada1d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80',
+        },
+      },
+    ],
+  });
 });
 
 client.login(process.env.BOT_TOKEN);
