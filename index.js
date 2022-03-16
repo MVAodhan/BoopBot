@@ -36,12 +36,11 @@ ws.on('message', async (data) => {
 
   const stream = await axios({
     method: 'get',
-    url: `https://tau-usenameaodhan.up.railway.app/api/twitch/helix/streams?user_login=adamcyounis`,
+    url: `https://tau-usenameaodhan.up.railway.app/api/twitch/helix/streams?user_login=${parsedData.event_data.broadcaster_user_login}`,
     headers: { Authorization: `Token ${process.env.TAU_TOKEN}` },
   }).then((res) => {
     return res.data.data;
   });
-  // ${parsedData.event_data.broadcaster_user_login}
 
   const schedule = await axios({
     method: 'get',
@@ -49,6 +48,11 @@ ws.on('message', async (data) => {
   });
 
   const epData = schedule.data;
+
+  // const imageUrl = await axios({
+  //   method: 'get',
+  //   url: `https://www.learnwithjason.dev/${epData[0].slug.current}/schedule.jpg`,
+  // });
 
   webhookClient.send({
     content: `${stream[0].user_name} is now streaming!`,
@@ -58,7 +62,7 @@ ws.on('message', async (data) => {
         description: `${epData[0].description}`,
         url: `https://www.twitch.tv/${stream[0].user_name}`,
         image: {
-          url: `https://images.unsplash.com/photo-1647240981158-a23de2d565c8?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80`,
+          url: `https://www.learnwithjason.dev/${epData[0].slug.current}/schedule.jpg`,
         },
       },
     ],
