@@ -1,12 +1,28 @@
 const { Client, Intents, WebhookClient } = require('discord.js');
 require('dotenv').config();
 
+const tmi = require('tmi.js');
+
+const tmiClient = new tmi.Client({
+  channels: ['jlengstorf'],
+});
+
 const axios = require('axios').default;
 
 const WebSocket = require('ws');
 
 const webhookClient = new WebhookClient({
   url: process.env.WEBHOOK_URL,
+});
+
+tmiClient.connect();
+
+tmiClient.on('message', (channel, tags, message, self) => {
+  if (tags['display-name'] === 'jlengstorf' && message.startsWith('https')) {
+    webhookClient.send({
+      content: `${message}`,
+    });
+  }
 });
 
 const ws = new WebSocket(
@@ -48,11 +64,6 @@ ws.on('message', async (data) => {
   });
 
   const epData = schedule.data;
-
-  // const imageUrl = await axios({
-  //   method: 'get',
-  //   url: `https://www.learnwithjason.dev/${epData[0].slug.current}/schedule.jpg`,
-  // });
 
   webhookClient.send({
     content: `${stream[0].user_name} is now streaming!`,
