@@ -52,11 +52,12 @@ ws.on('message', async (data) => {
 
   const stream = await axios({
     method: 'get',
-    url: `https://tau-usenameaodhan.up.railway.app/api/twitch/helix/streams?user_login=${parsedData.event_data.broadcaster_user_login}`,
+    url: `https://tau-usenameaodhan.up.railway.app/api/twitch/helix/streams?user_login=adamcyounis`,
     headers: { Authorization: `Token ${process.env.TAU_TOKEN}` },
   }).then((res) => {
     return res.data.data;
   });
+  // ${parsedData.event_data.broadcaster_user_login}
 
   const schedule = await axios({
     method: 'get',
