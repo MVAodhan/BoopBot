@@ -15,6 +15,17 @@ const webhookClient = new WebhookClient({
   url: process.env.WEBHOOK_URL,
 });
 
+const ws = new WebSocket(
+  'wss://tau-usenameaodhan.up.railway.app:443/ws/twitch-events/',
+  {
+    perMessageDeflate: false,
+  }
+);
+
+const client = new Client({
+  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
+});
+
 tmiClient.connect();
 
 tmiClient.on('message', (channel, tags, message, self) => {
@@ -25,20 +36,9 @@ tmiClient.on('message', (channel, tags, message, self) => {
   }
 });
 
-const ws = new WebSocket(
-  'wss://tau-usenameaodhan.up.railway.app:443/ws/twitch-events/',
-  {
-    perMessageDeflate: false,
-  }
-);
-
 ws.on('open', () => {
   console.log('Connected to websocket');
   ws.send(JSON.stringify({ token: process.env.TAU_TOKEN }));
-});
-
-const client = new Client({
-  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
 });
 
 client.on('ready', (c) => {
