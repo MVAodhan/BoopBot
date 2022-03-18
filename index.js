@@ -78,6 +78,8 @@ ws.on('message', async (data) => {
       },
     ],
   });
+
+  console.log(`${stream[0].user_name} is now streaming!`);
 });
 
 client.login(process.env.BOT_TOKEN);
