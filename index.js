@@ -12,7 +12,7 @@ const axios = require('axios').default;
 const WebSocket = require('ws');
 
 const webhookClient = new WebhookClient({
-  url: process.env.WEBHOOK_URL_ATS,
+  url: process.env.WEBHOOK_URL_LWJ,
 });
 
 const ws = new WebSocket(
@@ -66,7 +66,7 @@ ws.on('message', async (data) => {
 
   const stream = await axios({
     method: 'get',
-    url: `https://tau-usenameaodhan.up.railway.app/api/twitch/helix/streams?user_login=${process.env.TEST_STREAMER}`,
+    url: `https://tau-usenameaodhan.up.railway.app/api/twitch/helix/streams?user_login=${parsedData.event_data.broadcaster_user_login}`,
     headers: { Authorization: `Token ${process.env.TAU_TOKEN}` },
   }).then((res) => {
     return res.data.data;
