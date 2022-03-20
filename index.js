@@ -31,7 +31,13 @@ const app = express();
 const port = 3000;
 
 app.get('/health', (req, res) => {
-  res.status(200).send('Ok');
+  const data = {
+    uptime: process.uptime(),
+    message: 'Ok',
+    date: new Date(),
+  };
+
+  res.status(200).send(data);
 });
 
 tmiClient.connect();
