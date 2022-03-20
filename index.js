@@ -12,7 +12,7 @@ const axios = require('axios').default;
 const WebSocket = require('ws');
 
 const webhookClient = new WebhookClient({
-  url: process.env.WEBHOOK_URL,
+  url: process.env.WEBHOOK_URL_ATS,
 });
 
 const ws = new WebSocket(
@@ -24,6 +24,14 @@ const ws = new WebSocket(
 
 const client = new Client({
   intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
+});
+
+const express = require('express');
+const app = express();
+const port = 3000;
+
+app.get('/health', (req, res) => {
+  res.status(200);
 });
 
 tmiClient.connect();
@@ -52,11 +60,12 @@ ws.on('message', async (data) => {
 
   const stream = await axios({
     method: 'get',
-    url: `https://tau-usenameaodhan.up.railway.app/api/twitch/helix/streams?user_login=${parsedData.event_data.broadcaster_user_login}`,
+    url: `https://tau-usenameaodhan.up.railway.app/api/twitch/helix/streams?user_login=${process.env.TEST_STREAMER}`,
     headers: { Authorization: `Token ${process.env.TAU_TOKEN}` },
   }).then((res) => {
     return res.data.data;
   });
+  // ${parsedData.event_data.broadcaster_user_login}
 
   const schedule = await axios({
     method: 'get',
@@ -83,3 +92,7 @@ ws.on('message', async (data) => {
 });
 
 client.login(process.env.BOT_TOKEN);
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});
