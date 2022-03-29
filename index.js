@@ -71,7 +71,6 @@ ws.on('message', async (data) => {
   }).then((res) => {
     return res.data.data;
   });
-  // ${parsedData.event_data.broadcaster_user_login}
 
   const schedule = await axios({
     method: 'get',
