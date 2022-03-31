@@ -1,4 +1,4 @@
-const { Client, Intents, WebhookClient } = require('discord.js');
+const { Client, Intents, WebhookClient, MessageEmbed } = require('discord.js');
 require('dotenv').config();
 
 const tmi = require('tmi.js');
@@ -12,7 +12,7 @@ const axios = require('axios').default;
 const WebSocket = require('ws');
 
 const webhookClient = new WebhookClient({
-  url: process.env.WEBHOOK_URL_LWJ,
+  url: process.env.WEBHOOK_URL_ATS,
 });
 
 const ws = new WebSocket(
@@ -66,11 +66,16 @@ ws.on('message', async (data) => {
 
   const stream = await axios({
     method: 'get',
-    url: `https://tau-usenameaodhan.up.railway.app/api/twitch/helix/streams?user_login=${parsedData.event_data.broadcaster_user_login}`,
+    url: `https://tau-usenameaodhan.up.railway.app/api/twitch/helix/streams?user_login=${process.env.TEST_STREAMER}`,
     headers: { Authorization: `Token ${process.env.TAU_TOKEN}` },
-  }).then((res) => {
-    return res.data.data;
-  });
+  })
+    .then((res) => {
+      return res.data.data;
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  // parsedData.event_data.broadcaster_user_login;
 
   const schedule = await axios({
     method: 'get',
@@ -79,18 +84,31 @@ ws.on('message', async (data) => {
 
   const epData = schedule.data;
 
+  const streamEmbed = new MessageEmbed()
+    .setTitle(`${stream[0].title}`)
+    .setDescription(`${epData[0].description}`)
+    .setURL(`https://www.twitch.tv/${stream[0].user_name}`)
+    .setImage(
+      `https://www.learnwithjason.dev/${epData[0].slug.current}/schedule.jpg`
+    );
+
+  //   {
+  //   content: `${stream[0].user_name} is now streaming!`,
+  //   embeds: [
+  //     {
+  //       title: `${stream[0].title}`,
+  //       description: `${epData[0].description}`,
+  //       url: `https://www.twitch.tv/${stream[0].user_name}`,
+  //       image: {
+  //         url: `https://www.learnwithjason.dev/${epData[0].slug.current}/schedule.jpg`,
+  //       },
+  //     },
+  //   ],
+  // // }
+
   webhookClient.send({
-    content: `${stream[0].user_name} is now streaming!`,
-    embeds: [
-      {
-        title: `${stream[0].title}`,
-        description: `${epData[0].description}`,
-        url: `https://www.twitch.tv/${stream[0].user_name}`,
-        image: {
-          url: `https://www.learnwithjason.dev/${epData[0].slug.current}/schedule.jpg`,
-        },
-      },
-    ],
+    // content: `${stream[0].user_name} is now streaming!`,
+    embeds: [streamEmbed],
   });
 
   console.log(`${stream[0].user_name} is now streaming!`);
