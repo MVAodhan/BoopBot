@@ -12,7 +12,7 @@ const axios = require('axios').default;
 const WebSocket = require('ws');
 
 const webhookClient = new WebhookClient({
-  url: process.env.WEBHOOK_URL_ATS,
+  url: process.env.WEBHOOK_URL_LWJ,
 });
 
 const ws = new WebSocket(
