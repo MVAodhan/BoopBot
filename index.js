@@ -60,22 +60,17 @@ client.on('ready', (c) => {
 });
 
 ws.on('message', async (data) => {
-  const parsedData = JSON.parse(data);
+  const tauData = JSON.parse(data);
 
-  if (parsedData.event_type === 'stream-offline') return;
+  if (tauData.event_type === 'stream-offline') return;
 
   const stream = await axios({
     method: 'get',
-    url: `https://tau-usenameaodhan.up.railway.app/api/twitch/helix/streams?user_login=${process.env.TEST_STREAMER}`,
+    url: `https://tau-usenameaodhan.up.railway.app/api/twitch/helix/streams?user_login=${tauData.event_data.broadcaster_user_login}`,
     headers: { Authorization: `Token ${process.env.TAU_TOKEN}` },
-  })
-    .then((res) => {
-      return res.data.data;
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-  // parsedData.event_data.broadcaster_user_login;
+  }).then((res) => {
+    return res.data.data;
+  });
 
   const schedule = await axios({
     method: 'get',
@@ -92,22 +87,8 @@ ws.on('message', async (data) => {
       `https://www.learnwithjason.dev/${epData[0].slug.current}/schedule.jpg`
     );
 
-  //   {
-  //   content: `${stream[0].user_name} is now streaming!`,
-  //   embeds: [
-  //     {
-  //       title: `${stream[0].title}`,
-  //       description: `${epData[0].description}`,
-  //       url: `https://www.twitch.tv/${stream[0].user_name}`,
-  //       image: {
-  //         url: `https://www.learnwithjason.dev/${epData[0].slug.current}/schedule.jpg`,
-  //       },
-  //     },
-  //   ],
-  // // }
-
   webhookClient.send({
-    // content: `${stream[0].user_name} is now streaming!`,
+    content: `${stream[0].user_name} is now streaming!`,
     embeds: [streamEmbed],
   });
 
