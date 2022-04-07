@@ -54,6 +54,9 @@ ws.on('open', () => {
   console.log('Connected to websocket');
   ws.send(JSON.stringify({ token: process.env.TAU_TOKEN }));
 });
+ws.on('close', () => {
+  console.log('Websocket is disconected');
+});
 
 client.on('ready', (c) => {
   console.log(`Ready! Logged in as ${c.user.tag}`);
