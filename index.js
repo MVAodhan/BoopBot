@@ -66,7 +66,7 @@ const ws = new WebSocket(
     console.log(`${stream[0].user_name} is now streaming!`);
   });
 
-  ws.on('close', () => {
+  ws.on('close', (handleWS) => {
     console.log('Websocket is disconected, attempting reconnection...');
     handleWS();
   });
