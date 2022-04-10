@@ -24,7 +24,7 @@ const ws = new WebSocket(
   }
 );
 
-const handleWS = () => {
+(async function handleWS() {
   ws.on('open', () => {
     console.log('Connected to websocket');
     ws.send(JSON.stringify({ token: process.env.TAU_TOKEN }));
@@ -65,11 +65,11 @@ const handleWS = () => {
 
     console.log(`${stream[0].user_name} is now streaming!`);
   });
-};
+})();
 
-ws.on('close', (handleWS) => {
+ws.on('close', async (handleWS) => {
   console.log('Websocket is disconected, attempting reconnection...');
-  handleWS();
+  await handleWS();
 });
 
 const client = new Client({
@@ -101,8 +101,6 @@ client.on('ready', (c) => {
 });
 
 client.login(process.env.BOT_TOKEN);
-
-handleWS();
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
