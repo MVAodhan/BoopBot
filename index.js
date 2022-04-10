@@ -2,6 +2,9 @@ const { Client, Intents, WebhookClient, MessageEmbed } = require('discord.js');
 require('dotenv').config();
 const axios = require('axios').default;
 
+const express = require('express');
+const app = express();
+const port = 3000;
 const tmi = require('tmi.js');
 
 const tmiClient = new tmi.Client({
@@ -14,21 +17,17 @@ const webhookClient = new WebhookClient({
   url: process.env.WEBHOOK_URL_LWJ,
 });
 
-(function handleWS() {
-  const ws = new WebSocket(
-    'wss://tau-usenameaodhan.up.railway.app:443/ws/twitch-events/',
-    {
-      perMessageDeflate: false,
-    }
-  );
+const ws = new WebSocket(
+  'wss://tau-usenameaodhan.up.railway.app:443/ws/twitch-events/',
+  {
+    perMessageDeflate: false,
+  }
+);
 
+const handleWS = () => {
   ws.on('open', () => {
     console.log('Connected to websocket');
     ws.send(JSON.stringify({ token: process.env.TAU_TOKEN }));
-  });
-  ws.on('close', () => {
-    console.log('Websocket is disconected, attempting reconnection...');
-    handleWS();
   });
 
   ws.on('message', async (data) => {
@@ -66,15 +65,16 @@ const webhookClient = new WebhookClient({
 
     console.log(`${stream[0].user_name} is now streaming!`);
   });
-})();
+};
+
+ws.on('close', (handleWS) => {
+  console.log('Websocket is disconected, attempting reconnection...');
+  handleWS();
+});
 
 const client = new Client({
   intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
 });
-
-const express = require('express');
-const app = express();
-const port = 3000;
 
 app.get('/health', (req, res) => {
   const data = {
@@ -101,6 +101,8 @@ client.on('ready', (c) => {
 });
 
 client.login(process.env.BOT_TOKEN);
+
+handleWS();
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
