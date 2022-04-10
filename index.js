@@ -65,12 +65,12 @@ const ws = new WebSocket(
 
     console.log(`${stream[0].user_name} is now streaming!`);
   });
-})();
 
-ws.on('close', async (handleWS) => {
-  console.log('Websocket is disconected, attempting reconnection...');
-  await handleWS();
-});
+  ws.on('close', () => {
+    console.log('Websocket is disconected, attempting reconnection...');
+    handleWS();
+  });
+})();
 
 const client = new Client({
   intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
