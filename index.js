@@ -17,58 +17,62 @@ const webhookClient = new WebhookClient({
   url: process.env.WEBHOOK_URL_LWJ,
 });
 
-const ws = new WebSocket(
-  'wss://tau-usenameaodhan.up.railway.app:443/ws/twitch-events/',
-  {
-    perMessageDeflate: false,
-  }
-);
+const connect = async () => {
+  const ws = new WebSocket(
+    'wss://tau-usenameaodhan.up.railway.app:443/ws/twitch-events/',
+    {
+      perMessageDeflate: false,
+    }
+  );
 
-ws.on('open', () => {
-  console.log('Connected to websocket');
-  ws.send(JSON.stringify({ token: process.env.TAU_TOKEN }));
-});
-
-ws.on('message', async (data) => {
-  const tauData = JSON.parse(data);
-
-  if (tauData.event_type === 'stream-offline') return;
-
-  const stream = await axios({
-    method: 'get',
-    url: `https://tau-usenameaodhan.up.railway.app/api/twitch/helix/streams?user_login=${tauData.event_data.broadcaster_user_login}`,
-    headers: { Authorization: `Token ${process.env.TAU_TOKEN}` },
-  }).then((res) => {
-    return res.data.data;
+  ws.on('open', () => {
+    console.log('Connected to websocket');
+    ws.send(JSON.stringify({ token: process.env.TAU_TOKEN }));
   });
 
-  const schedule = await axios({
-    method: 'get',
-    url: 'https://www.learnwithjason.dev/api/schedule',
+  ws.on('message', async (data) => {
+    const tauData = JSON.parse(data);
+
+    if (tauData.event_type === 'stream-offline') return;
+
+    const stream = await axios({
+      method: 'get',
+      url: `https://tau-usenameaodhan.up.railway.app/api/twitch/helix/streams?user_login=${tauData.event_data.broadcaster_user_login}`,
+      headers: { Authorization: `Token ${process.env.TAU_TOKEN}` },
+    }).then((res) => {
+      return res.data.data;
+    });
+
+    const schedule = await axios({
+      method: 'get',
+      url: 'https://www.learnwithjason.dev/api/schedule',
+    });
+
+    const epData = schedule.data;
+
+    const streamEmbed = new MessageEmbed()
+      .setTitle(`${stream[0].title}`)
+      .setDescription(`${epData[0].description}`)
+      .setURL(`https://www.twitch.tv/${stream[0].user_name}`)
+      .setImage(
+        `https://www.learnwithjason.dev/${epData[0].slug.current}/schedule.jpg`
+      );
+
+    webhookClient.send({
+      content: `${stream[0].user_name} is now streaming!`,
+      embeds: [streamEmbed],
+    });
+
+    console.log(`${stream[0].user_name} is now streaming!`);
   });
 
-  const epData = schedule.data;
-
-  const streamEmbed = new MessageEmbed()
-    .setTitle(`${stream[0].title}`)
-    .setDescription(`${epData[0].description}`)
-    .setURL(`https://www.twitch.tv/${stream[0].user_name}`)
-    .setImage(
-      `https://www.learnwithjason.dev/${epData[0].slug.current}/schedule.jpg`
-    );
-
-  webhookClient.send({
-    content: `${stream[0].user_name} is now streaming!`,
-    embeds: [streamEmbed],
+  ws.on('close', () => {
+    console.log('Websocket is disconected, attempting reconnection...');
+    handleWS();
   });
+};
 
-  console.log(`${stream[0].user_name} is now streaming!`);
-});
-
-ws.on('close', (handleWS) => {
-  console.log('Websocket is disconected, attempting reconnection...');
-  handleWS();
-});
+connect();
 
 const client = new Client({
   intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
