@@ -68,7 +68,13 @@ const connect = async () => {
 
   ws.on('close', () => {
     console.log('Websocket is disconected, attempting reconnection...');
-    connect();
+
+    try {
+      connect();
+    } catch (e) {
+      console.log(e, 'attempting to connect again');
+      connect();
+    }
   });
 };
 
