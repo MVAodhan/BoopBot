@@ -4,7 +4,7 @@ const axios = require('axios').default;
 
 const express = require('express');
 const app = express();
-const port = 3000;
+const PORT = 3000;
 const tmi = require('tmi.js');
 
 const tmiClient = new tmi.Client({
@@ -104,6 +104,6 @@ client.on('ready', (c) => {
 
 client.login(process.env.BOT_TOKEN);
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Example app listening on PORT ${PORT}`);
 });
